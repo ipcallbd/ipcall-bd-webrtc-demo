@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Call BD — WebRTC Demo</title>
+    <meta name="description" content="Simple WebRTC SIP phone demo for IP Call BD">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <header class="header">
+            <div class="brand">
+                <span class="brand-icon"><i data-lucide="phone"></i></span>
+                <div>
+                    <h1>IP Call BD</h1>
+                    <p>WebRTC Demo</p>
+                </div>
+            </div>
+            <div class="status" id="status">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">Offline</span>
+            </div>
+        </header>
+
+        <!-- Login -->
+        <section class="panel" id="login-panel">
+            <h2>Connect</h2>
+            <label>
+                Server
+                <input type="text" id="server" value="talk.ipcall.bd">
+            </label>
+            <label>
+                Extension
+                <input type="text" id="username" value="55500">
+            </label>
+            <label>
+                Password
+                <input type="password" id="password" value="Demo1234">
+            </label>
+            <button class="btn btn-primary" id="connect-btn">
+                <i data-lucide="plug"></i>
+                <span>Connect</span>
+            </button>
+        </section>
+
+        <!-- Dialer -->
+        <section class="panel hidden" id="dialer-panel">
+            <div class="display">
+                <p class="call-info hidden" id="call-info">
+                    <span id="call-party"></span>
+                    <span id="call-timer">00:00</span>
+                </p>
+                <input type="text" id="number" placeholder="Enter number" readonly>
+            </div>
+
+            <div class="keypad" id="keypad">
+                <button type="button" data-key="1">1</button>
+                <button type="button" data-key="2">2</button>
+                <button type="button" data-key="3">3</button>
+                <button type="button" data-key="4">4</button>
+                <button type="button" data-key="5">5</button>
+                <button type="button" data-key="6">6</button>
+                <button type="button" data-key="7">7</button>
+                <button type="button" data-key="8">8</button>
+                <button type="button" data-key="9">9</button>
+                <button type="button" data-key="*">*</button>
+                <button type="button" data-key="0">0</button>
+                <button type="button" data-key="#">#</button>
+            </div>
+
+            <div class="actions" id="actions-idle">
+                <button class="btn btn-secondary" id="disconnect-btn">
+                    <i data-lucide="log-out"></i>
+                    <span>Disconnect</span>
+                </button>
+                <button class="btn btn-call" id="call-btn" title="Call">
+                    <i data-lucide="phone"></i>
+                </button>
+                <button class="btn btn-secondary btn-icon" id="backspace-btn" title="Backspace">
+                    <i data-lucide="delete"></i>
+                </button>
+            </div>
+
+            <div class="actions hidden" id="actions-incall">
+                <button class="btn btn-secondary" id="mute-btn">
+                    <i data-lucide="mic"></i>
+                    <span>Mute</span>
+                </button>
+                <button class="btn btn-hangup" id="hangup-btn">
+                    <i data-lucide="phone-off"></i>
+                    <span>Hang up</span>
+                </button>
+            </div>
+
+            <div class="actions hidden" id="actions-incoming">
+                <button class="btn btn-call" id="answer-btn">
+                    <i data-lucide="phone-incoming"></i>
+                    <span>Answer</span>
+                </button>
+                <button class="btn btn-hangup" id="reject-btn">
+                    <i data-lucide="phone-off"></i>
+                    <span>Reject</span>
+                </button>
+            </div>
+        </section>
+
+        <footer class="log">
+            <button type="button" class="log-toggle" id="log-toggle">
+                <i data-lucide="scroll-text"></i>
+                <span>Activity log</span>
+                <i data-lucide="chevron-down" class="log-chevron"></i>
+            </button>
+            <div class="log-body" id="log-body"></div>
+        </footer>
+    </main>
+
+    <audio id="remote-audio" autoplay></audio>
+
+    <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+    <script src="sip-0.21.2.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
