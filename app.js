@@ -40,6 +40,8 @@ let registered = false;
 let muted = false;
 let timer = null;
 let seconds = 0;
+/** @type {MediaStream | null} */
+let remoteStream = null;
 
 function refreshIcons() {
     if (window.lucide) lucide.createIcons();
@@ -181,6 +183,7 @@ function makeCall() {
     }
 
     const inviter = new SIP.Inviter(userAgent, targetUri, {
+        earlyMedia: true,
         sessionDescriptionHandlerOptions: { constraints: { audio: true, video: false } },
     });
 
@@ -249,7 +252,13 @@ function toggleMute() {
 
 function bindSession(s, party) {
     s.stateChange.addListener((state) => {
-        if (state === SIP.SessionState.Established) {
+        if (state === SIP.SessionState.Establishing) {
+            attachAudio(s);
+            if (s instanceof SIP.Inviter) {
+                showInCall(party, 'Ringing…');
+                log('Ringback / early media', 'ok');
+            }
+        } else if (state === SIP.SessionState.Established) {
             attachAudio(s);
             showInCall(party, null);
             startTimer();
@@ -266,17 +275,19 @@ function attachAudio(s) {
     const pc = s.sessionDescriptionHandler?.peerConnection;
     if (!pc) return;
 
-    const play = (track) => {
-        ui.remoteAudio.srcObject = new MediaStream([track]);
+    if (!remoteStream) remoteStream = new MediaStream();
+
+    const addAudioTrack = (track) => {
+        if (!track || track.kind !== 'audio') return;
+        if (!remoteStream.getTracks().includes(track)) {
+            remoteStream.addTrack(track);
+        }
+        ui.remoteAudio.srcObject = remoteStream;
         ui.remoteAudio.play().catch(() => {});
     };
 
-    pc.getReceivers().forEach((r) => {
-        if (r.track?.kind === 'audio') play(r.track);
-    });
-    pc.ontrack = (e) => {
-        if (e.track.kind === 'audio') play(e.track);
-    };
+    pc.getReceivers().forEach((r) => addAudioTrack(r.track));
+    pc.ontrack = (e) => addAudioTrack(e.track);
 }
 
 function pressKey(key) {
@@ -322,6 +333,7 @@ function resetCallUi() {
     ui.actionsIncall.classList.add('hidden');
     ui.actionsIncoming.classList.add('hidden');
     ui.keypad.classList.remove('hidden');
+    remoteStream = null;
     ui.remoteAudio.srcObject = null;
 }
 
